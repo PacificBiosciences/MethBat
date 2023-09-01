@@ -6,6 +6,8 @@ Key features include:
 * Creation of cohort / background profiles from a collection of methylation profiles
 * Analysis of cohort profiles comparing sub-groups (e.g., case v. control, male v. female)
 
+Authors: [Matt Holt](https://github.com/holtjma), [Chris Saunders](https://github.com/ctsa)
+
 ## Early release warning
 Please note that MethBat is still in early development. 
 We are still tweaking the input / output file formats and making changes that can affect the behavior of the program.
@@ -24,7 +26,7 @@ MethBat does not currently have a pre-print or publication.
 
 ## Need help?
 If you notice any missing features, bugs, or need assistance with analyzing the output of MethBat, 
-please don't hesitate to [reach out by email](mailto:mholt@pacificbiosciences.com) or open a GitHub issue.
+please don't hesitate to open a GitHub issue.
 
 ## Support information
 MethBat is a pre-release software intended for research use only and not for use in diagnostic procedures. 
