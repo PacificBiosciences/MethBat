@@ -5,6 +5,7 @@ Key features include:
 * Creation of a methylation profile for a collection of genomic regions (e.g., CpG islands)
 * Creation of cohort / background profiles from a collection of methylation profiles
 * Analysis of cohort profiles comparing sub-groups (e.g., case v. control, male v. female)
+* Segmentation of the CpGs in a dataset into Methylated, Unmethylated, or ASM regions
 
 Authors: [Matt Holt](https://github.com/holtjma), [Chris Saunders](https://github.com/ctsa)
 
@@ -19,6 +20,7 @@ We are still tweaking the input / output file formats and making changes that ca
 * [Installation instructions](docs/install.md)
 * [User guide with quickstart](docs/user_guide.md)
 * [Output files](docs/user_guide.md#output-files)
+* [Methods](docs/methods.md)
 * [Data files](data/)
 
 ## Citation
