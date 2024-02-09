@@ -48,9 +48,11 @@ methbat profile \
 ```
 
 # Main workflows
-There are currently two main workflows that are supported by MethBat: 1) rare methylation analysis and 2) cohort methylation analysis.
-Both workflows require building a cohort/background methylation profile that can be used to generate statistical comparisons.
-The steps for each workflow are summarized below, with greater details in the following subsections:
+There are currently three main workflows that are supported by MethBat: 1) [rare methylation analysis](#rare-methylation-analysis), 2) [cohort methylation analysis](#cohort-methylation-analysis), and 3) [segmentation](#segmentation-analysis).
+
+## Cohort analysis workflows
+The first two workflows require building a cohort/background methylation profile that can be used to generate statistical comparisons.
+The steps for the first two workflows are summarized below, with greater details in the following subsections:
 
 1. Gather a cohort of HiFi datasets that have haplotagged BAM files with methylation information. We recommend using the PacBio best practices pipeline which uses pbmm2, DeepVariant, pbsv, and HiPhase to generate the haplotagged BAM file from a uBAM.
 2. Gather individual CpG stats using [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools) for each dataset. Both count and model modes are supported, but `methbat` parameters are tuned for model mode.
@@ -151,6 +153,20 @@ Parameters:
 * `--output-comparison {OUT_COMPARISON}` - the output CSV/TSV [comparison file](#cohort-comparison-files)
 * `--baseline-category {BASELINE}` - the baseline category, all stats will be relative to the datasets in this category
 * `--compare-category {COMPARE}` - the comparator category
+
+## Segmentation analysis
+Segmentation clusters the CpGs based on their methylation status into one of three categories: Methylated, Unmethylated, or AlleleSpecificMethylation.
+Methylated/Unmethylated is calculated separately from AlleleSpecificMethylation, so there is potentially some overlap in the derived segments.
+
+```bash
+methbat segment \
+    --input-prefix {IN_PREFIX} \
+    --output-segments {OUT_BED}
+```
+
+Parameters:
+* `--input-prefix {IN_PREFIX}` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus
+* `--output-segments {OUT_BED}` - The path to the output BED file. The fourth column indicates the segment categorization: Methylated, Unmethylated, or AlleleSpecificMethylation
 
 # Supported upstream processes
 The following upstream processes are supported as inputs to MethBat:
