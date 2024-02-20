@@ -166,7 +166,12 @@ methbat segment \
 
 Parameters:
 * `--input-prefix {IN_PREFIX}` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus
-* `--output-segments {OUT_BED}` - The path to the output BED file. The fourth column indicates the segment categorization: Methylated, Unmethylated, or AlleleSpecificMethylation
+* `--output-segments {OUT_BED}` - The path to the output BED file. The fourth column indicates the segment categorization: Methylated (M), Unmethylated (U), or AlleleSpecificMethylation (ASM)
+
+### Common segmentation options
+* `--condense-bed-labels` - Condenses the output labels to an abbreviated form (e.g., Methylated -> M)
+* `--enable-haplotype-segmentation` - Enables the output of additional haplotype-specific segments in the output. These segments are generated with a separate segmentation run on each of the individual haplotypes. The output segments will be labeled with a haplotype prefix ("H1" or "H2") followed by the corresponding segmentation category (Methylated or Unmethylated).
+* `--enable-nodata-segments` - Enabled the output of additional "NoData" ("ND" if condensed) segments in the output. These segments correspond to regions where combined methylation values are available but the corresponding haplotype data is absent. The output segments will be labeled with a haplotyped prefix ("H1" or "H2"). For example, "H1_NoData" indicated that haplotype 1 is missing in the corresponding region.
 
 # Supported upstream processes
 The following upstream processes are supported as inputs to MethBat:
