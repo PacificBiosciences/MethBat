@@ -1,3 +1,7 @@
+# v0.10.1
+## Fixed
+- Fixed a panic caused by low sample sizes in the `compare` command. These will now be flagged as `InsufficientData`.
+
 # v0.10.0
 ## Changes
 - Adds a CLI option `--enable-haplotype-segmentation` that will run segmentation on the individual haplotypes (H1 and H2) and save those segments in the output BED file. For example, an unmethylated region on haplotype 2 will have the label "H2_Unmethylated" (or "H2_U" if condensed).
