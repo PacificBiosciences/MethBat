@@ -18,6 +18,7 @@ Several user parameters control the segmentation behavior, which are described b
 * `--target-confidence` - Confidence metric (e.g. 0.99 = 99%) which is converted to a Z-score for comparing the populations. Higher values correspond to higher Z-scores (see `--min-abs-zscore`).
 * `--min-abs-zscore` - Z-score metric used to determine if a segment should be split or not. Higher values increases the threshold required to split a segment, leading to fewer overall segments in the output.
 * `--min-cpgs` - Controls the minimum size of a segment in terms of number of CpGs. Smaller values may lead to over-segmentation. Similarly, higher values may lead to under-segmentation.
+* `--max-gap` - Controls the maximum allowed basepairs between consecutive CpGs. If the gap exceeds this threshold, then the region will be split into separate segments.
 
 There are also controls for how the final segments are labeled, which are described below:
 * `--min-asm-abs-delta-mean` - Controls the minimum allowed difference between haplotype methylation fractions to label a segment as Allele Specific Methylation (ASM). Lower values may lead to an over-representation of ASM segments, whereas higher values may lead to an under-representation of ASM. Mathematically, if haplotype 1 has a methylation fraction of 0.8 and haplotype 2 has a methylation fraction of 0.2, then the delta mean (hap2-hap1) is -0.6. If this parameter is left as the default of 0.5, MethBat would label the corresponding segment as ASM because |-0.6| >= 0.5.

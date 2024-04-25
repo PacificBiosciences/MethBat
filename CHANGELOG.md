@@ -1,3 +1,8 @@
+# v0.11.0
+## Changes
+- Modifies the segmentation algorithm to prevent large segments from spanning CpG data gaps. The new algorithm will automatically create segment break points between two consecutive CpGs that exceed a maximum gap threshold. This reduces segment size inflation around regions with low coverage and/or absent phasing information.
+- Adds a CLI option `--max-gap` to control the maximum gap threshold, default: 1000 bp.
+
 # v0.10.1
 ## Fixed
 - Fixed a panic caused by low sample sizes in the `compare` command. These will now be flagged as `InsufficientData`.
