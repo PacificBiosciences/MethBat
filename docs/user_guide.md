@@ -166,7 +166,10 @@ methbat segment \
 
 Parameters:
 * `--input-prefix {IN_PREFIX}` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus
-* `--output-segments {OUT_BED}` - The path to the output BED file. The fourth column indicates the segment categorization: Methylated (M), Unmethylated (U), or AlleleSpecificMethylation (ASM)
+* `--output-prefix {OUT_PREFIX}` - The path to the prefix for all output files. The following files will be generated:
+  * `{OUT_PREFIX}.meth_regions.bed` - BED file with merged regions. The fourth column indicates the segment categorization: Methylated (M), Unmethylated (U), or AlleleSpecificMethylation (ASM).
+  * `{OUT_PREFIX}.combined_methyl.bedgraph` - BEDGRAPH file with raw values from combined methylation segmentation. The fourth column indicates the combined methylation average for the segment; range 0.0 (unmethylated) to 1.0 (methylated).
+  * `{OUT_PREFIX}.asm.bedgraph` - BEDGRAPH file with raw values from ASM segmentation. The fourth column indicates the ASM average for the segment, calculated as: (methylation of haplotype 2) - (methylation of haplotype 1); range -1.0 (H1 methylated, H2 unmethylated) to 1.0 (H1 unmethylated, H2 methylated).
 
 ### Common segmentation options
 * `--condense-bed-labels` - Condenses the output labels to an abbreviated form (e.g., Methylated -> M)
