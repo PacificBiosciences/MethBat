@@ -1,3 +1,10 @@
+# v0.12.0
+## Changes
+- **Breaking change**: The `methbat segment` output `--output-segments` has been changed to `--output-prefix`. It will now generate the following output files with extensions of the given prefix:
+  - `{OUT_PREFIX}.meth_regions.bed` - The BED file with merged regions, same output as the previous `--output-segments` option
+  - `{OUT_PREFIX}.combined_methyl.bedgraph` - _New_ output that contains the underlying combined methylation values for each segmented region
+  - `{OUT_PREFIX}.asm.bedgraph` - _New_ output that contains the underlying ASM values for each segmented region
+
 # v0.11.0
 ## Changes
 - Modifies the segmentation algorithm to prevent large segments from spanning CpG data gaps. The new algorithm will automatically create segment break points between two consecutive CpGs that exceed a maximum gap threshold. This reduces segment size inflation around regions with low coverage and/or absent phasing information.
