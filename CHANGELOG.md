@@ -1,3 +1,12 @@
+# v0.13.0
+## Changes
+- Beta release of a new signature mode, `methbat signature`, that will identify regions with different combined methylation in a case-control population. Greater details on usage can be found in the documentation for signature mode.
+- User guide documentation has been re-organized into sections based on functionality for easier use
+
+## Fixed
+- Fixed an issue where the mean methylation metrics for `methbat profile` were aggregated with unequal weights
+- Updated the provided `meth_profile_model.tsv` background file to use the correct equal weights. The changes across most loci are relatively small, with the average delta of ~1% for `avg_abs_meth_deltas` and ~2% for `avg_combined_methyls`.
+
 # v0.12.0
 ## Changes
 - **Breaking change**: The `methbat segment` output `--output-segments` has been changed to `--output-prefix`. It will now generate the following output files with extensions of the given prefix:
