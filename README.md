@@ -18,8 +18,7 @@ We are still tweaking the input / output file formats and making changes that ca
 
 ## Documentation
 * [Installation instructions](docs/install.md)
-* [User guide with quickstart](docs/user_guide.md)
-* [Output files](docs/user_guide.md#output-files)
+* [User guide](docs/user_guide.md)
 * [Methods](docs/methods.md)
 * [Data files](data/)
 
