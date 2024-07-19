@@ -1,4 +1,16 @@
 # Installing MethBat
+## From conda
+The easiest way to install MethBat is through [conda](https://docs.conda.io/projects/conda/en/stable/user-guide/install/index.html):
+
+```bash
+# create a brand new conda environment and install latest MethBat
+conda create -n methbat -c bioconda methbat
+# OR install latest into current conda environment
+conda install methbat
+# OR install a specific version into current conda environment
+conda install methbat=0.13.0
+```
+
 ## From GitHub
 Conda updates usually lag the GitHub release by a couple days.
 Use the following instructions to get the most recent version directly from GitHub:
