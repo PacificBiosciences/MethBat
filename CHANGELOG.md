@@ -1,3 +1,12 @@
+# v0.13.1
+## Changes
+- Adds two haplotype-specific tracks for `methbat segment`:
+  - `{OUT_PREFIX}.hap1.bedgraph` - Contains the underlying methylation values for haplotype 1 for each segmented region
+  - `{OUT_PREFIX}.hap2.bedgraph` - Same as above, but for haplotype 2
+
+## Fixed
+- Fixed an issue where the BEDGRAPH outputs from `methbat segment` were reporting median values instead of the indicated mean values. This change did not alter the segmentation itself. However, since the value associated with each segment changed, the reported regions in `{OUT_PREFIX}.meth_regions.bed` may be altered to reflect the correct, mean values.
+
 # v0.13.0
 ## Changes
 - Beta release of a new signature mode, `methbat signature`, that will identify regions with different combined methylation in a case-control population. Greater details on usage can be found in the documentation for signature mode.
