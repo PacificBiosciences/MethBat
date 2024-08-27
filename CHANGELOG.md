@@ -1,3 +1,7 @@
+# v0.13.2
+## Fixed
+- Modified the checker for `profile` and `segment` modes to allow for missing hap1 and hap2 BED files. This is most common when pb-CpG-tools is run on unphased datasets. A warning will be produced in the log if these files are missing, and haplotype-specific data will not be generated.
+
 # v0.13.1
 ## Changes
 - Adds two haplotype-specific tracks for `methbat segment`:
