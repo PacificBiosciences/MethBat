@@ -12,7 +12,7 @@ Table of contents:
 ```bash
 methbat segment \
     --input-prefix {IN_PREFIX} \
-    --output-segments {OUT_BED}
+    --output-prefix {OUT_PREFIX}
 ```
 
 Parameters:

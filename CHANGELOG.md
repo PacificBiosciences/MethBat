@@ -1,3 +1,8 @@
+# v0.14.0
+## Changes
+- Adds a new sub-command `methbat joint-segment`: This sub-command loads all methylation values for a cohort and generates an average methylation for the collection. This average is then segmented into combined methylation and allele-specific methylation segments.
+- **Breaking change** - The CLI verbosity flag (`-v`) has been moved into a shared location. Commands that previously used it (e.g. `methbat segment -v ...`) will need to update the position to before the sub-command (e.g. `methbat -v segment ...`).
+
 # v0.13.3
 ## Changes
 - Added support for parsing pb-CpG-tools files that have been compressed (i.e., `{prefix}.combined.bed.gz`) to save storage
