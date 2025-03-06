@@ -18,7 +18,7 @@ methbat signature \
     --baseline-category {BASELINE} \
     --compare-category {COMPARATOR} \
     --input-collection {COLLECTION} \
-    --output-prefix {OUT_PREFIX} \
+    --output-prefix {OUT_PREFIX}
 ```
 
 Parameters:
