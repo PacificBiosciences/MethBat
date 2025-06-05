@@ -1,3 +1,8 @@
+# v0.14.1
+## Fixed
+- Improved error handling for small population sizes when calling `signature`
+- Added earlier error checks with better messaging for `signature`
+
 # v0.14.0
 ## Changes
 - Adds a new sub-command `methbat joint-segment`: This sub-command loads all methylation values for a cohort and generates an average methylation for the collection. This average is then segmented into combined methylation and allele-specific methylation segments.
