@@ -1,3 +1,7 @@
+# v0.14.2
+## Fixed
+- Fixed an issue where CpG segments with fewer CpGs than the `--min-cpgs` parameter could get created. This primarily occurred with groups of isolated CpGs, and affected `segment`, `joint-segment`, and `signature` modes. These small isolated segments are now filtered after the segmentation step, and therefor removed from all outputs.
+
 # v0.14.1
 ## Fixed
 - Improved error handling for small population sizes when calling `signature`
