@@ -1,3 +1,11 @@
+# v0.15.0
+## Changes
+- **Breaking**: Added five new columns to the output of `profile`:
+  - `cpg_label` - A pass-through of the optional `cpg_label` field in the provided regions or background file
+  - `mean_combined_methyl_delta` - This is the raw delta value that is used to generate `mean_combined_methyl_zscore`. This will only be populated if background statistics are provided.
+  - `median_total_coverage`, `median_hap1_coverage`, and `median_hap2_coverage` - These metrics are calculated by extracting the coverage values from the pb-CpG-tools inputs and calculating the median of each. For hap1 and hap2, only the CpGs with phased information will be used.  
+- **Breaking**: Added the `cpg_label` column to the `build` output, this is a pass-through of the label from the provided profiles
+
 # v0.14.2
 ## Fixed
 - Fixed an issue where CpG segments with fewer CpGs than the `--min-cpgs` parameter could get created. This primarily occurred with groups of isolated CpGs, and affected `segment`, `joint-segment`, and `signature` modes. These small isolated segments are now filtered after the segmentation step, and therefor removed from all outputs.

@@ -162,6 +162,7 @@ If a background profile is provided, relative metrics (such as Z-scores) will al
 
 Fields:
 * `chrom`, `start`, `end` - the region definition, copied from the input region file
+* `cpg_label` - a pass-through of the optional `cpg_label` field from the background file; empty string if not provided
 * `summary_label` - a summarization of the methylation status for this region, possible options are below:
   * `NoData` - indicates no CpGs were found inside the region
   * `Uncategorized` - indicates that CpGs were present, but there was not enough evidence to label this region with any of the following labels
@@ -183,18 +184,22 @@ Fields:
 * `mean_meth_delta` - the difference in mean methylation ratios between the two haplotypes; `mean_meth_delta = mean_hap2_methyl - mean_hap1_methyl`
 * `mean_abs_meth_delta_zscore` - if a background region file was provided, this value is the Z-score comparing `abs(mean_meth_delta)` against the background profile; positive values indicate _more_ evidence of ASM in this dataset relative to the population, negative values indicate _less_
 * `mean_combined_methyl` - the mean (average) combined methylation ratio; "combined" here indicates that phasing (i.e. haplotypes) is not considered
-* `mean_combined_methyl_zscore` - if a background region file was provided, this value is the Z-score comparing `mean_combined_methyl` against the background profile; positive values indicate this dataset is hyper-methylated relative to the the population, negative values indicate hypo-methylation
+* `mean_combined_methyl_delta` - if a background region file was provided, this value is the raw delta value comparing the sample methylation to the population mean: `mean_combined_methyl - population_mean_combined_methyl`; positive values indicate this dataset is hyper-methylated relative to the the population, negative values indicate hypo-methylation
+* `mean_combined_methyl_zscore` - if a background region file was provided, this value is the corresponding Z-score for `mean_combined_methyl_delta`
 * `num_phased_cpgs` - the number of CpGs in the region with haplotagged reads on both haplotypes
 * `num_partial_cpgs` - the number of CpGs in the region with haplotagged reads on only one haplotype
 * `num_unphased_cpgs` - the number of CpGs in the region with no haplotagged reads
+* `median_total_coverage` - the median coverage across all CpGs in the region
+* `median_hap1_coverage` - the median coverage for CpGs with haplotype 1 information
+* `median_hap2_coverage` - the median coverage for CpGs with haplotype 2 information
 
 Example:
 ```
-chrom	start	end	summary_label	compare_label	background_category	category_pop_count	category_pop_freq	asm_fishers_pvalue	mean_hap1_methyl	mean_hap2_methyl	mean_meth_delta	mean_abs_meth_delta_zscore	mean_combined_methyl	mean_combined_methyl_zscore	num_phased_cpgs	num_partial_cpgs	num_unphased_cpgs
-chr1	28735	29737	Unmethylated	Uncategorized	ALL	75	1.0	0.004919553947553728	0.05885963392250609	0.047044954980294464	-0.01181467894221167	-0.34912373121989750.025268950189202555	-0.1315141967636566	113	0	0
-chr1	28735	29737	Unmethylated	Uncategorized	FEMALE	45	1.0	0.004919553947553728	0.05885963392250609	0.047044954980294464	-0.01181467894221167	-0.43383762338663810.025268950189202555	-0.3625714249590449	113	0	0
-chr1	135124	135563	Uncategorized	Uncategorized	ALL	11	0.14666666666666667	3.774032618914446e-12	0.9621704619311497	0.7499140499066592	-0.21225641202449116	3.2865300050104986	0.7964857023430671	-0.9735374007607187	32	0	0
-chr1	135124	135563	Uncategorized	Uncategorized	FEMALE	6	0.13333333333333333	3.774032618914446e-12	0.9621704619311497	0.7499140499066592	-0.21225641202449116	3.0353565777478027	0.7964857023430671	-0.9943730322724927	32	0	0
+chrom	start	end	cpg_label	summary_label	compare_label	background_category	category_pop_count	category_pop_freq	asm_fishers_pvalue	mean_hap1_methyl	mean_hap2_methyl	mean_meth_delta	mean_abs_meth_delta_zscore	mean_combined_methyl	mean_combined_methyl_delta	mean_combined_methyl_zscorenum_phased_cpgs	num_partial_cpgs	num_unphased_cpgs	median_total_coverage	median_hap1_coverage	median_hap2_coverage
+chr1	28735	29737		Unmethylated	Uncategorized	ALL	75	1.0	1.0					0.17243041578246626	0.1464171602940825	31.679626056551015	0	112	0	30	0	0
+chr1	28735	29737		Unmethylated	Uncategorized	FEMALE	45	1.0	1.0					0.17243041578246626	0.1454921997690331635.503286897692604	0	112	0	30	0	0
+chr1	135124	135563		Uncategorized	Uncategorized	ALL	13	0.17333333333333334	2.8101320453402143e-6	0.8458333333333332	0.6798662173202615	-0.1659671160130719	2.251684417249699	0.7112726449275364	-0.12212309455390957	-2.3180253595055658	32	0	0	24	6	18
+chr1	135124	135563		Uncategorized	Uncategorized	FEMALE	8	0.17777777777777778	2.8101320453402143e-6	0.8458333333333332	0.6798662173202615	-0.1659671160130719	1.9303680510272383	0.7112726449275364	-0.12020558409700743	-2.4153845948490433	32	0	0	24	6	18
 ...
 ```
 
@@ -205,6 +210,7 @@ Example cohort background profiles can be found in the [data folder](../data/).
 
 Fields:
 * `chrom`, `start`, `end` - the region definition
+* `cpg_label` - a pass-through of the optional `cpg_label` field from the profile files; empty string if not provided
 * `data_category` - the label assigned to the dataset; "ALL" indicates the full cohort; there is one line in the file for each combination of region and `data_category`
 * `num_phased` - the number of datasets with `num_phased_cpgs > 0` for this region
 * `num_unphased` - the number of datasets with `num_phased_cpgs == 0` for this region
@@ -215,10 +221,10 @@ Fields:
 
 Example:
 ```
-chrom	start	end	data_category	num_phased	num_unphased	NoData	Uncategorized	Methylated	Unmethylated	AlleleSpecificMethylation	avg_abs_meth_deltas	stdev_abs_meth_deltas	avg_combined_methyls	stdev_combined_methyls
-chr1	28735	29737	ALL	73	2	0	0	0	75	0	0.01838721188173107	0.01882579828232775	0.02586729468921431	0.004549657107262999
-chr1	28735	29737	FEMALE	44	1	0	0	0	45	0	0.018232146044057464	0.014792324952708208	0.026786472749753616	0.004185444456143989
-chr1	28735	29737	MALE	29	1	0	0	0	30	0	0.01862248418716691	0.023983589672305305	0.024488527598405387	0.004791927756910658
+chrom	start	end	cpg_label	data_category	num_phased	num_unphased	NoData	Uncategorized	Methylated	Unmethylated	AlleleSpecificMethylation	avg_abs_meth_deltas	stdev_abs_meth_deltas	avg_combined_methyls	stdev_combined_methyls
+chr1	28735	29737		ALL	35	40	0	0	0	75	0	0.024403707454700878	0.027451278913196875	0.026013255488383766	0.00462180835192671
+chr1	28735	29737		FEMALE	24	21	0	0	0	45	0	0.027315808774336398	0.029415442108339362	0.026938216013433092	0.004097992396824781
+chr1	28735	29737		MALE	11	19	0	0	0	30	0	0.01805003184822339	0.022522685750106002	0.02462581470080977	0.005070390346250782
 ...
 ```
 
