@@ -1,0 +1,82 @@
+name: Update Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to update (e.g., v0.8.1)'
+        required: true
+        type: string
+
+jobs:
+  update-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          # Handle both automatic tag pushes and manual workflow dispatch
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            # Manual trigger - use input parameter
+            TAG="${{ github.event.inputs.tag }}"
+            VERSION=${TAG#v}
+          else
+            # Automatic trigger - extract from git tag
+            TAG=${GITHUB_REF#refs/tags/}
+            VERSION=${TAG#v}
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog section
+        id: changelog
+        run: |
+          # Find the changelog section for this version
+          if grep -q "^# v${{ steps.extract_version.outputs.version }}$" CHANGELOG.md; then
+            # Extract from the version header to the next version header or end of file
+            awk '
+              /^# v${{ steps.extract_version.outputs.version }}$/ { 
+                in_section = 1; 
+                next 
+              }
+              /^# v[0-9]+\.[0-9]+\.[0-9]+$/ && in_section { 
+                exit 
+              }
+              in_section { 
+                print 
+              }
+            ' CHANGELOG.md > release_body.txt
+
+            echo "" >> release_body.txt
+            echo "---" >> release_body.txt
+            echo "" >> release_body.txt
+            echo "This release was automatically updated from tag ${{ steps.extract_version.outputs.tag }}." >> release_body.txt
+          else
+            echo "No changelog found for version ${{ steps.extract_version.outputs.version }}" > release_body.txt
+          fi
+
+      - name: Get Release ID
+        id: get_release
+        run: |
+          # Get the release ID for this tag
+          RELEASE_ID=$(gh api repos/${{ github.repository }}/releases/tags/${{ steps.extract_version.outputs.tag }} --jq '.id')
+          echo "release_id=$RELEASE_ID" >> $GITHUB_OUTPUT
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Release
+        run: |
+          # Update the existing release with new changelog content
+          gh api repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }} \
+            --method PATCH \
+            --field body=@release_body.txt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
