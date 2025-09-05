@@ -5,7 +5,6 @@ This approach uses non-negative least squares (NNLS) regression to deconvolve bu
 Table of contents:
 
 * [Quickstart](#quickstart)
-* [Deconvolution workflow](#deconvolution-workflow)
 * [Atlas format](#atlas-format)
 * [Output files](#output-files)
 
@@ -21,7 +20,7 @@ methbat deconvolve \
 
 Parameters:
 * `--input-prefix {IN_PREFIX}` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus; supports both uncompressed (.bed) and compressed (.bed.gz) files
-* `--atlas-regions {ATLAS_FILE}` - the cell type atlas file in MethBat format; example atlases are provided in the [data folder](../data/cell_atlas/)
+* `--atlas-regions {ATLAS_FILE}` - the cell type atlas file in MethBat format; the format is [described below](#atlas-format) and example atlases are provided in the [data folder](../data/cell_atlas/)
 * `--output-estimate {OUT_JSON}` - the output JSON file containing deconvolution results
 
 
