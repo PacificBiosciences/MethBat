@@ -1,3 +1,8 @@
+# v0.16.0
+## Changes
+- Added new `methbat deconvolve` sub-command for cell type deconvolution from bulk methylation data. See [deconvolution guide](./docs/deconvolution_guide.md) for details on usage.
+- Added two example atlas files derived from public atlases: [data/cell_atlas](./data/cell_atlas/)
+
 # v0.15.0
 ## Changes
 - **Breaking**: Added five new columns to the output of `profile`:

@@ -6,6 +6,7 @@ Key features include:
 * Creation of cohort / background profiles from a collection of methylation profiles
 * Analysis of cohort profiles comparing sub-groups (e.g., case v. control, male v. female)
 * Segmentation of the CpGs in a dataset into Methylated, Unmethylated, or ASM regions
+* Cell type deconvolution from bulk methylation data using reference atlases
 
 Authors: [Matt Holt](https://github.com/holtjma), [Chris Saunders](https://github.com/ctsa)
 
