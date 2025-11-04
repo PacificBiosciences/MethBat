@@ -1,3 +1,7 @@
+# v0.16.1
+## Fixed
+- Fixed an issue where compressed bed files were not recognized by `methbat signature` mode
+
 # v0.16.0
 ## Changes
 - Added new `methbat deconvolve` sub-command for cell type deconvolution from bulk methylation data. See [deconvolution guide](./docs/deconvolution_guide.md) for details on usage.
