@@ -1,4 +1,11 @@
-# MethBat : A battery of methylation tools for PacBio HiFi reads
+<h1 align="center"><img width="300px" src="docs/images/logo_methbat.svg"/></h1>
+
+<h1 align="center">MethBat</h1>
+
+<p align="center">A battery of methylation tools for PacBio HiFi reads</p>
+
+***
+
 MethBat will aggregate and analyze CpG methylation calls made from [PacBio HiFi](https://www.pacb.com/technology/hifi-sequencing/) datasets.
 Key features include:
 
