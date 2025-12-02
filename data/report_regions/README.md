@@ -12,8 +12,8 @@ In these cases, "neutral" methylation states (e.g., ~50% combined methylation) m
 * Source: These regions are derived from [Table 2](https://clinicalepigeneticsjournal.biomedcentral.com/articles/10.1186/s13148-022-01358-9/tables/2) of [Mackay et al. 2022](http://doi.org/10.1186/s13148-022-01358-9).
 * Coordinates: GRCh38
 * Tested with:
-  * >200 cell line samples
-  * >300 blood sample
+  * \>200 cell line samples
+  * \>300 blood sample
   * All samples were WGS with at least 25x mean coverage
 * Known problem regions:
   * `H19/IGF2:IG-DMR` - In GRCh38, some versions include ALT contigs that pull reads away from this mapping location, leading to significant loss of alignments and increased classification errors.
@@ -28,8 +28,8 @@ In these cases, "neutral" methylation states (e.g., ~50% combined methylation) m
 * Source: These regions were created by applying `methbat joint-segment` to >300 WGS blood samples with at least 25x mean coverage. They were then overlapped and labeled with the same identifiers from `imprinting_targets.tsv`. Generally, the coordinates closely match, and we see very marginal differences in the output. However, these may be slightly more accurate regions since they have been derived from HiFi observations.
 * Coordinates: GRCh38
 * Tested with:
-  * >200 cell line samples
-  * >300 blood sample
+  * \>200 cell line samples
+  * \>300 blood sample
   * All samples were WGS with at least 25x mean coverage
 * Known problem regions:
   * `H19/IGF2:IG-DMR` - A consistent ASM region was not identified due to ALT contigs pulling reads away from this mapping location. It has been removed from this set.
