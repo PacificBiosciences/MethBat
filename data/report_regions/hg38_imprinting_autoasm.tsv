@@ -1,0 +1,15 @@
+chrom	start	end	cpg_label	expected_category	anomalous_categories
+chr6	144006984	144008751	PLAGL1:alt-TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr7	50782012	50783615	GRB10:alt-TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr7	130490280	130493269	MEST:alt-TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr11	2698717	2701029	KCNQ1OT1:TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr14	100811000	100811037	MEG3/DLK1:IG-DMRa	AlleleSpecificMethylation	Methylated;Unmethylated
+chr14	100824207	100827641	MEG3:TSS-DMRb	AlleleSpecificMethylation	Methylated;Unmethylated
+chr15	23647277	23648622	MAGEL2:TSS-DMRb	AlleleSpecificMethylation	Methylated;Unmethylated
+chr15	24954856	24956829	SNURF:TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr16	3442827	3444463	ZNF597:TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr19	56837124	56841903	PEG3:TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr20	58838983	58843218	GNAS-NESP:TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr20	58850593	58852977	GNAS-AS1:TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr20	58854029	58856408	GNAS-XL:Ex1-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
+chr20	58888341	58890145	GNAS A/B:TSS-DMR	AlleleSpecificMethylation	Methylated;Unmethylated
