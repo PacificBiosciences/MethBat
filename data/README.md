@@ -1,5 +1,8 @@
 # Data
-This folder contains data resources for use with MethBat.
+This folder contains data resources for use with MethBat. Subfolders:
+
+* [cell_atlas](./cell_atlas/) - Cell atlases that have been pre-configured to work with `methbat deconvolve`
+* [report_regions](./report_regions/) - Regions with known methylation patterns that have been pre-configured to work with `methbat report`
 
 ## CpG profiles
 These files contain background / cohort CpG profiles that can be provided to MethBat to describe coordinates of regions of interest.

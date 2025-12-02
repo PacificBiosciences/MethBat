@@ -1,3 +1,12 @@
+# v0.17.0
+## Changes
+- Added new `methbat report` sub-command for analyzing pre-defined regions with known expected methylation patterns (e.g., imprinting regions). The command compares observed methylation patterns against expected patterns, identifying regions with anomalous methylation states and generating quality control warnings. See [report guide](./docs/report_guide.md) for details on usage.
+- Added example report region files for GRCh38 imprinting regions in [data/report_regions](./data/report_regions/)
+- Added an output header to most output CSV/TSV files that includes the MethBat version, command, and the datetime the command was run. These header lines are prefixed with the '#' character.
+
+## Fixed
+- The `profile` output TSV files have been modified such that their column headers do not have the '#' prefix
+
 # v0.16.1
 ## Fixed
 - Fixed an issue where compressed bed files were not recognized by `methbat signature` mode

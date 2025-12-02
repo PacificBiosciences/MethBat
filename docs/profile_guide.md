@@ -253,7 +253,7 @@ Fields:
 
 Example (this file has been spliced to show different results from FEMALE v. MALE outputs):
 ```
-#chrom	start	end	baseline_category	compare_category	summary_comparison	zscore_avg_abs_meth_deltas	delta_avg_abs_meth_deltas	baseline_num_phased	compare_num_phased	zscore_avg_combined_methyls	delta_avg_combined_methyls	baseline_num_samples	compare_num_samples
+chrom	start	end	baseline_category	compare_category	summary_comparison	zscore_avg_abs_meth_deltas	delta_avg_abs_meth_deltas	baseline_num_phased	compare_num_phased	zscore_avg_combined_methyls	delta_avg_combined_methyls	baseline_num_samples	compare_num_samples
 chr1	28735	29737	FEMALE	MALE	Uncategorized	0.0783692468300548	0.0003903381431094449	44	29	-2.1384731927805856	-0.0022979451513482282	45	30
 chr1	491107	491546	FEMALE	MALE	InsufficientData		0.0	0	0	-1.299378424859551	-0.044848726779527226	16	9
 chr1	143326822	143327608	FEMALE	MALE	HyperMethylated	0.6439708246041966	0.09808535591965556	9	7	4.217908672989068	0.2262013390038578	45	30
