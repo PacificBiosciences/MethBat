@@ -13,15 +13,16 @@ The following command will perform cell type deconvolution on a single dataset:
 
 ```bash
 methbat deconvolve \
-    --input-prefix {IN_PREFIX} \
+    --input-pileup {PILEUP_BED_GZ} \
     --atlas-regions {ATLAS_FILE} \
     --output-estimate {OUT_JSON}
 ```
 
 Parameters:
-* `--input-prefix {IN_PREFIX}` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus; supports both uncompressed (.bed) and compressed (.bed.gz) files
+* `--input-pileup {PILEUP_BED_GZ}` - a single bgzipped unified pileup BED from [methbat pileup](./pileup_guide.md) (for example `{OUT_PREFIX}.5mC.bed.gz`). The shipped atlases under [public/data/cell_atlas](../data/cell_atlas/) are 5mC-based; this sub-command has not been validated on `5hmC` or `6mA` pileups.
 * `--atlas-regions {ATLAS_FILE}` - the cell type atlas file in MethBat format; the format is [described below](#atlas-format) and example atlases are provided in the [data folder](../data/cell_atlas/)
 * `--output-estimate {OUT_JSON}` - the output JSON file containing deconvolution results
+* `--strand {combined|forward|reverse}` - (optional) row-level strand filter on the input pileup; default `combined` aggregates across strands. See [pileup output strand semantics](./pileup_guide.md#strand-filter) for what each value selects.
 
 
 ## Atlas format
@@ -53,7 +54,7 @@ The deconvolution process generates a single JSON output file with the following
   "version": "0.16.0-8dcb2bf",
   "atlas_md5sum": "6e30a2eafd8da7410d4e7766c7c71d94",
   "cli_settings": {
-    "input_prefix": "./pipeline/cpg_5mc_model/HG001",
+    "input_pileup_bed": "./pipeline/methbat_pileup/HG001.5mC.bed.gz",
     "atlas_regions": "./data/cell_atlas/nanomix/39Bisulfite.methbat.tsv",
     "output_estimate": "./HG001_cell_estimate.json",
     "min_active": 0.05

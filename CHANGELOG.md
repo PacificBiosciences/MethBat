@@ -1,3 +1,22 @@
+# v1.0.0
+## Changes
+- MethBat now generates per-base-modification pileup BEDs directly from aligned HiFi BAM files via the new `methbat pileup` sub-command; [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools) is no longer required or supported as an input source. See the [pileup guide](./docs/pileup_guide.md) for usage.
+- **Added end-to-end support for 5hmC and 6mA base modifications in addition to 5mC**: `methbat pileup` produces `5hmC` and `6mA` pileup BEDs alongside `5mC`, and every pileup-consuming sub-command accepts them.
+- **Breaking changes**: see the [v1.0.0 migration guide](./docs/migration_v1.md) for the detailed per-sub-command CLI before/after and output-format changes.
+  - New `methbat pileup` sub-command replaces pb-CpG-tools as the upstream pileup source.
+  - `profile`, `segment`, `report`, and `deconvolve` now take `--input-pileup {BED.GZ}` (a single unified pileup BED) in place of the old `--input-prefix {PREFIX}` (a pb-CpG-tools prefix).
+  - `signature` and `joint-segment` collection files now list a single `.bed.gz` from `methbat pileup` in the `filename` column instead of a pb-CpG-tools prefix.
+  - The pileup output is a single 15-column BED per modification (`{OUT_PREFIX}.{5mC,5hmC,6mA}.bed.gz`) keyed by a `type` column (`Total`, `hap1`, `hap2`), superseding the pb-CpG-tools `combined` / `hap1` / `hap2` three-file layout.
+  - Some optional parameters have been renamed to be more base-modification agnostic. For example, the `--min-cpgs` segmentation option has been renamed to `--min-sites`. Where possible, the old parameter is still accepted as an alias for the new one.
+  - **`methbat signature`**: significance filtering for hyper/hypo BED inclusion uses **`--min-welch-t`** (Welch two-sample \|t\|); **`--min-zscore`** remains an alias. **`signature_stats.tsv`** adds **`summary_label`** and renames several columns; see the [migration guide](./docs/migration_v1.md#signature-stats-tsv) for details.
+  - **`methbat signature`**: bootstrap sampling, which was previously always on, is now **off by default**. New options `--enable-sampling`, `--num-samples` (default: 40), and `--sample-rate` (default: 0.8) control the behavior; pass `--enable-sampling` to restore the previous behavior.
+  - Added a shared `##` comment preamble (version, datetime, command, and `base_modification` / `strand` where applicable) to every output file across all sub-commands. This preamble is required for some input files to `methbat` (e.g., any profile provided to the `build` command).
+  - **Methylation percentages (breaking for parsers)**: Many TSV and BEDGRAPH fields that previously stored methylation as unit fractions in `[0.0, 1.0]` (or signed haplotype deltas in `[-1.0, 1.0]`) now write methylation percentages, using the same representation as the pileup `mod_score` column. This affects cohort/profile/report/compare/signature outputs and segment/joint-segment BEDGRAPH `score` columns (see the [migration guide](./docs/migration_v1.md#breaking-change-methylation-percentages) for the full list).
+- Added a `--strand {combined|forward|reverse}` filter to every pileup-consuming sub-command which controls which strand(s) of data is used; default: `combined` will use both strands of data.
+
+## Fixed
+- Resolved an issue where `joint-segment` would produce non-deterministic outputs when given the same input datasets
+
 # v0.17.0
 ## Changes
 - Added new `methbat report` sub-command for analyzing pre-defined regions with known expected methylation patterns (e.g., imprinting regions). The command compares observed methylation patterns against expected patterns, identifying regions with anomalous methylation states and generating quality control warnings. See [report guide](./docs/report_guide.md) for details on usage.
