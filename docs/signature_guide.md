@@ -1,9 +1,10 @@
 # Signature guide
 This section of the user guide contains information on using `methbat signature` to identify regions with different methylation patterns between cases and controls.
 This mode is run agnostic of any genomic features (such as CpG islands), and requires a cohort to generate the regions of interest.
-At a high level, `methbat signature` loads all of the datasets into memory and then calculates the average combined methylation for both cases and controls for all CpGs in the datasets.
-The averages are then subtracted into a delta metric, and then it runs segmentation on this delta, grouping the CpGs into regions with similar methylation deltas between the cases and controls.
-Finally, for each putative segment, it calculates summary statistics via random downsampling of the population and aggregates the statistical results, reporting only those that consistently pass the provided cutoffs for both impact and significance.
+At a high level, `methbat signature` loads all of the datasets into memory and then calculates the average combined methylation for both cases and controls at every pileup site.
+The averages are then subtracted into a delta metric, and then it runs segmentation on this delta, grouping sites into regions with similar methylation deltas between the cases and controls.
+Finally, for each putative segment, it calculates summary statistics and reports only those that pass the provided cutoffs for both impact and significance.
+When `--enable-sampling` is set, the statistics are computed via bootstrap downsampling of the population and aggregated across draws; without it, statistics are computed on the full population.
 
 Table of contents:
 
@@ -22,64 +23,71 @@ methbat signature \
 ```
 
 Parameters:
-* `--threads {THREADS}` - the number of threads to use for both loading CpGs into memory and analyzing putative segments
-* `--baseline-category {BASELINE}` - the baseline category, all stats will be relative to the datasets matching this category; default: "control"
-* `--compare-category {COMPARATOR}` - the comparator category; default: "case"
-* `--input-collection {COLLECTION}` - a file defining the cohort; [an example](#input-collection-file) is shown below
-* `--output-prefix {OUT_PREFIX}` - the prefix for all [output signature files](#output-files)
+* `--threads {THREADS}` / `-t` — the number of threads to use for both loading pileup sites into memory and analyzing putative segments
+* `--baseline-category {BASELINE}` / `-b` — the baseline category; all stats will be relative to the datasets matching this category; default: "control"
+* `--compare-category {COMPARATOR}` / `-c` — the comparator category; default: "case"
+* `--input-collection {COLLECTION}` / `-i` — a file defining the cohort; [an example](#input-collection-file) is shown below
+* `--output-prefix {OUT_PREFIX}` / `-o` — the prefix for all [output signature files](#output-files)
+* `--strand {combined|forward|reverse}` — (optional) row-level strand filter on every per-sample pileup loaded from the collection; default `combined` aggregates across strands. See [pileup output strand semantics](./pileup_guide.md#strand-filter) for what each value selects.
+* `--enable-sampling` — (optional) enable bootstrap sampling for per-segment statistics; off by default. When enabled, each segment's statistics are computed across multiple random sub-samples and then aggregated.
 
 ## Input collection file
-The cohort file provides information to MethBat regarding the identifier, location (file path prefix), and any associated labels for each dataset that will be a part of the cohort.
+The cohort file provides information to MethBat regarding the identifier, path to each dataset’s pileup BED, and any associated labels for each dataset that will be a part of the cohort.
 
 Fields:
 * `identifier` - a unique string identifier for the dataset
-* `filename` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus
+* `filename` - path to the gzipped pileup BED produced by [methbat pileup](./pileup_guide.md) (for example `{OUT_PREFIX}.5mC.bed.gz`). All rows in the collection must reference files for the **same base modification** (all `5mC`, or all `5hmC`, etc.).
 * `labels` - any labels associated with the dataset; all datasets will always go into the "ALL" category; this field can be blank or have multiple labels that are ';'-delimited; for our example below, HG005 has both the "MALE" and "case" labels
 
 Example:
 ```
 identifier	filename	labels
-HG001	/path/to/HG001	FEMALE;control
-HG002	/path/to/HG002	control
-HG005	/path/to/HG005	MALE;case
+HG001	/path/to/HG001.5mC.bed.gz	FEMALE;control
+HG002	/path/to/HG002.5mC.bed.gz	control
+HG005	/path/to/HG005.5mC.bed.gz	MALE;case
 ...
 ```
 
 # Output files
 These are the main output files from `methbat signature`:
 
-* `{OUT_PREFIX}.signature_regions.bed` - BED file containing all regions that were identified that are of interest based on the provided cutoffs. The fourth field is a methylation label relative to the baseline category ("HyperMethylated" or "HypoMethylated"). This file can be used in [methbat profile](./profile_guide.md). For a region to appear in this file, it must:
+* `{OUT_PREFIX}.signature_regions.bed` - BED file containing regions whose **`summary_label`** is **HyperMethylated** or **HypoMethylated** (see [Detailed signature file](#detailed-signature-file)). The fourth field matches that label. This file can be used in [methbat profile](./profile_guide.md). For a region to appear in this file, it must:
   * Have enough samples in both baseline and comparator sets - controlled by `--min-sample-frac` option, default: 0.8 (80% of each category in the cohort)
-  * Pass the significant threshold according to a point-biserial correlation T-score - controlled by `--min-zscore` option, default: 5.0
-  * Have a high methylation delta - controlled by `--min-delta` option, default: 0.2 (20% difference in methylation); the difference in mean and median combined methylation between baseline and comparator must both be larger than this cutoff
-* `{OUT_PREFIX}.signature_stats.tsv` - [Detailed signature file](#detailed-signature-file) containing the underlying metrics for all generated segments, regardless of inclusion in signature regions BED file
+  * Pass the significance threshold according to a Welch's T-test - controlled by `--min-welch-t`, default: 5.0
+  * Have a high methylation delta - controlled by `--min-delta` option, default: 20%. Together with Welch t, **HyperMethylated** requires comparator mean and median each to exceed baseline by at least this margin; **HypoMethylated** requires baseline to exceed comparator by the same margin
+* `{OUT_PREFIX}.signature_stats.tsv` - [Detailed signature file](#detailed-signature-file) containing the underlying metrics for **all** generated segments, including **`Uncategorized`** rows that do not appear in the BED.
 
 ## Detailed signature file
 TSV file containing the computed metrics for each segment that was generated by `methbat signature`.
 
+The file begins with three comment lines (`##methbat_version`, `##datetime`, `##command`) describing the tool version, run time, and exact command line. The next line is a header row naming the columns; data rows follow.
+
 Fields:
 * `chrom`, `start`, `end` - the segment definition; coordinates are 0-based with an exclusive tail, e.g. `[start, end)`
-* `z_score` - Z-score from the two-sample T-test or Welch's T-test; not used for cut-offs
-* `r_value` - [Point-biserial correlation coefficient](https://en.wikipedia.org/wiki/Point-biserial_correlation_coefficient); not used for cut-offs
-* `t_value` - T-score generated from the above `r_value`; compared to `--min-zscore` cutoff
-* `num_samples1` - number of baseline datasets with data in this segment
-* `num_samples2` - number of comparator datasets that data in this segment
-* `mean1` and `mean2` - the average combined methylation of the baseline and comparator datasets, respectively; compared to `--min-delta` cutoff
-* `median1` and `median2` - the median combined methylation of the baseline and comparator datasets, respectively; compared to `--min-delta` cutoff
+* `summary_label` - **`HyperMethylated`**, **`HypoMethylated`**, or **`Uncategorized`**, from the same directional rules as the BED filter (see [Output files](#output-files))
+* `welch_t_score` - Welch two-sample statistic (unequal variances) comparing baseline vs comparator methylation in the segment; used for cut-offs
+* `point_biserial_r_value` - [Point-biserial correlation coefficient](https://en.wikipedia.org/wiki/Point-biserial_correlation_coefficient); not used for cut-offs
+* `point_biserial_t_value` - correlation-derived t-style statistic from `point_biserial_r_value` (testing zero correlation); not used for cut-offs, but is often highly similar to `welch_t_score`
+* `baseline_num_samples` - number of baseline datasets with data in this segment
+* `compare_num_samples` - number of comparator datasets with data in this segment
+* `baseline_mean` / `compare_mean` - the average combined methylation percentage of the baseline and comparator datasets, respectively; compared to `--min-delta`
+* `baseline_median` / `compare_median` - the median combined methylation percentage of the baseline and comparator datasets, respectively; compared to `--min-delta`
 
-Example:
+Example format (after the `##` comment lines):
 ```
-chrom	start	end	z_score	r_value	t_value	num_samples1	num_samples2	mean1	mean2	median1	median2
-chr1	14485	15749	-0.280574655013814	-0.04779835350827459	-0.288693002556005	30	8	0.9105159350774169	0.9047313797313798	0.9214900295782648	0.9152589240824534
-chr1	15768	16068	2.2680693270719963	0.3294954459878293	2.1020187482306874	30	8	0.873170481842289	0.9204582129203359	0.8782142857142857	0.9271998624011009
-chr1	16069	17478	-1.6087730245773184	-0.2528855729891738	-1.6425614010330505	32	9	0.8985459147786985	0.8679836021455991	0.9049557771239692	0.8666666666666667
-chr1	17482	18152	-1.1668653072851747	-0.1844976046826709	-1.175333443444668	32	9	0.937427763510071	0.9154143994229912	0.9388054755701813	0.909090909090909
+chrom	start	end	summary_label	welch_t_score	point_biserial_r_value	point_biserial_t_value	baseline_num_samples	compare_num_samples	baseline_mean	compare_mean	baseline_median	compare_median
+chr1	12264	12867	Uncategorized	2.187	0.583989	2.016	5	4	87.1	91.6	86.5	91.6
+chr1	13078	14553	Uncategorized	-2.354	-0.660457	-2.399	5	4	68.6	62.4	69.8	63.2
+chr1	14588	14888	Uncategorized	1.648	0.481679	1.476	5	4	90.8	96.1	94.8	96.0
+chr1	14928	15882	Uncategorized	-1.413	-0.431165	-1.298	5	4	87.4	83.6	90.5	83.9
+chr1	15904	16619	Uncategorized	-2.238	-0.621328	-2.125	5	4	88.0	76.5	93.5	74.9
+chr1	16633	19248	Uncategorized	1.206	0.368930	1.074	5	4	86.3	90.7	90.4	90.9
 ...
 ```
 
 # Resource requirements
 The signature workflow is more resource intensive than other modes in `methbat`.
-For each dataset in the cohort, it loads all combined methylation CpG values into memory prior to running the joint segmentation algorithm.
+For each dataset in the cohort, it loads every pileup site (combined methylation values) into memory prior to running the joint segmentation algorithm.
 Anecdotally, we have found this requires ~1 GB of memory per human dataset.
 Additionally, loading this data into memory and then processing it is computationally expensive.
 We recommend using the multi-threading capabilities of `methbat` with the `--threads` option to reduce this run-time burden.

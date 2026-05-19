@@ -1,6 +1,6 @@
 # Profile guide
 This section of the user guide contains information on using `methbat` on pre-defined regions of interest from the genome, such as known CpG islands.
-This approach extracts the CpGs overlapping the pre-defined regions and aggregates the signal for the region, allowing `methbat` to assign labels such as "Methylated" or "AlleleSpecificMethylation" for the regions.
+This approach extracts pileup sites overlapping the pre-defined regions and aggregates the signal for the region, allowing `methbat` to assign labels such as "Methylated" or "AlleleSpecificMethylation" for the regions.
 The `methbat profile` command is the core of this approach, which will gather these metrics and assign labels for all provided regions.
 Additionally, a background cohort can be provided instead of just the regions which allows `methbat` to also assign labels relative to the cohort, such as "HyperMethylated" or "HypoASM".
 
@@ -15,40 +15,33 @@ The following command will create a methylation profile for a single dataset:
 
 ```bash
 methbat profile \
-    --input-prefix {IN_PREFIX} \
+    --input-pileup {PILEUP_BED_GZ} \
     --input-regions {IN_REGIONS} \
     --output-region-profile {OUT_PROFILE} \
     --profile-label {LABEL}
 ```
 
 Parameters:
-* `--input-prefix {IN_PREFIX}` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus
-* `--input-regions {IN_REGIONS}` - the genomic regions of interest; this can be a BED-like coordinate file or a background profile generated from `methbat build ...`; some example profiles are provided in the [data folder](../data/)
-* `--output-region-profile {OUT_PROFILE}` - the output profile for this dataset
-* `--profile-label {LABEL}` - (optional) if a background profile is provided, this label specified which subset of the background to compare against; defaults to "ALL" and can be specified multiple times
+* `--input-pileup {PILEUP_BED_GZ}` / `-i` — unified pileup BED from [methbat pileup](./pileup_guide.md); `{OUT_PREFIX}.{mod}.bed.gz` where `{mod}` is `5mC`, `5hmC`, or `6mA`
+* `--input-regions {IN_REGIONS}` / `-r` — the genomic regions of interest; this can be a BED-like coordinate file or a background profile generated from `methbat build ...`; some example profiles are provided in the [data folder](../data/)
+* `--output-region-profile {OUT_PROFILE}` / `-o` — the output profile for this dataset
+* `--strand {combined|forward|reverse}` — (optional) row-level strand filter on the input pileup; default `combined` aggregates across strands. See [pileup output strand semantics](./pileup_guide.md#strand-filter) for what each value selects.
+* `--profile-label {LABEL}` — (optional) if a background profile is provided, this label specifies which subset of the background to compare against; defaults to "ALL" and can be specified multiple times
 
 ## Quickstart Example
+The following command will create a methylation profile for a single dataset:
+
 ```
 methbat profile \
-    --input-prefix ./pipeline/cpg_5mc_model/HG001 \
+    --input-pileup ./HG001.5mC.bed.gz \
     --input-regions ./data/cpgIslandExt_sorted.tsv \
-    --output-region-profile ./output/HG001.meth_region_stats.tsv \
-    --profile-label ALL \
-    --profile-label FEMALE 
-
-[2023-07-07T15:59:48.961Z INFO  methbat::cli::profile] Input prefix: "./pipeline/cpg_5mc_model/HG001"
-[2023-07-07T15:59:48.961Z INFO  methbat::cli::profile] Region profiling:
-[2023-07-07T15:59:48.961Z INFO  methbat::cli::profile] 	Input profile regions: "./data/cpgIslandExt_sorted.tsv"
-[2023-07-07T15:59:48.961Z INFO  methbat::cli::profile] 	Output profile file: "./output/HG001.meth_region_stats.tsv"
-[2023-07-07T15:59:48.961Z INFO  methbat::cli::profile] 	Profile selections: ["ALL", "FEMALE"]
-[2023-07-07T15:59:48.961Z INFO  methbat::cpg_parser] Loading "./pipeline/cpg_5mc_model/HG001.combined.bed"...
-[2023-07-07T15:59:48.964Z INFO  methbat::cpg_parser] Model mode auto-detected
-[2023-07-07T16:00:17.677Z INFO  methbat::cpg_parser] Loading "./pipeline/cpg_5mc_model/HG001.hap1.bed"...
-[2023-07-07T16:00:40.287Z INFO  methbat::cpg_parser] Loading "./pipeline/cpg_5mc_model/HG001.hap2.bed"...
-[2023-07-07T16:01:01.713Z INFO  methbat::cpg_parser] Loading "./data/cpgIslandExt_sorted.tsv"...
-[2023-07-07T16:01:01.947Z INFO  methbat::writers::region_writer] Saving region results to "./output/HG001.meth_region_stats.tsv"...
-[2023-07-07T16:01:04.403Z INFO  methbat] Process finished successfully.
+    --output-region-profile ./output/HG001.meth_region_stats.tsv
 ```
+
+Parameters:
+* `--input-pileup {PILEUP_BED_GZ}` / `-i` — unified pileup BED from [methbat pileup](./pileup_guide.md); `{OUT_PREFIX}.{mod}.bed.gz` where `{mod}` is one of the supported modifications (`5mC`, `5hmC`, or `6mA`)
+* `--input-regions {IN_REGIONS}` / `-r` — the genomic regions of interest (e.g. CpG islands for 5mC workflows); an [example CpG island file](../data/cpgIslandExt.sorted.hg38.tsv) is provided in our [data folder](../data/)
+* `--output-region-profile {OUT_PROFILE}` / `-o` — the [output profile](#single-dataset-profiles) for this dataset
 
 # Profile workflows
 ## Cohort analysis workflows
@@ -56,28 +49,13 @@ There are two workflows that require building a cohort/background methylation pr
 The steps for the first two workflows are summarized below, with greater details in the following subsections:
 
 1. Gather a cohort of HiFi datasets that have haplotagged BAM files with methylation information. We recommend using the PacBio best practices pipeline which uses pbmm2, DeepVariant, pbsv, and HiPhase to generate the haplotagged BAM file from a uBAM.
-2. Gather individual CpG stats using [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools) for each dataset. Both count and model modes are supported, but `methbat` parameters are tuned for model mode.
+2. Gather unified pileup outputs using [methbat pileup](./pileup_guide.md) for each dataset. See [methbat pileup](./pileup_guide.md) for details.
 3. [Generate a basic profile](#generating-a-basic-methylation-profile) for each dataset using `methbat profile ...`. The region file provided in this step will be very similar to a basic BED file.
 4. [Generate a cohort methylation profile](#generating-a-cohort-methylation-profile) for the cohort using `methbat build ...`.
 5. For [rare methylation analysis](#rare-methylation-analysis), re-run `methbat profile ...` using the cohort methylation profile. This will re-run the same analysis, but will also calculate Z-scores relative to the cohort profile.
 6. For [cohort methylation analysis](#cohort-methylation-analysis), run `methbat compare ...` using the cohort methylation profile. The will calculate Z-scores of sub-groups within the population, highlighting regions with different methylation patterns in the sub-groups.
 
-## Generating a basic methylation profile
-The following command will create a methylation profile for a single dataset:
-
-```bash
-methbat profile \
-    --input-prefix {IN_PREFIX} \
-    --input-regions {IN_REGIONS} \
-    --output-region-profile {OUT_PROFILE}
-```
-
-Parameters:
-* `--input-prefix {IN_PREFIX}` - the prefix for the outputs from [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools), these outputs contain CpG metrics aggregated at each CpG locus; both model and count modes are supported, but the same mode should be used for all datasets; MethBat uses defaults tuned for the model mode
-* `--input-regions {IN_REGIONS}` - the genomic regions of interest (e.g. CpG islands); an [example CpG island file](../data/cpgIslandExt.sorted.hg38.tsv) is provided in our [data folder](../data/)
-* `--output-region-profile {OUT_PROFILE}` - the [output profile](#single-dataset-profiles) for this dataset
-
-### Example regions file
+## Example regions file
 The baseline regions file is a CSV/TSV containing all of the information in a typical BED file, but with a header.
 We have provided the [CpG island file for hg38](../data/cpgIslandExt.sorted.hg38.tsv) with this repo.
 
@@ -85,7 +63,7 @@ Fields:
 * `chrom` - the chromosome of the region
 * `start` - the 0-based start of the region, inclusive
 * `end` - the 0-based end of the region, exclusive
-* `cpg_label` - (optional column) a label assigned to the region
+* `region_label` - (optional column) a label assigned to the region; legacy header `cpg_label` is accepted when reading
 
 Example: 
 ```
@@ -135,7 +113,7 @@ HG005	/path/to/HG005.profile.tsv	MALE;AFFECTED
 ## Rare methylation analysis
 If a full background / cohort profile is provided, MethBat will automatically annotate regions with unusual methylation states in the `compare_label` of the [output single dataset profile](#single-dataset-profiles).
 These cutoffs used to define unusual can all be controlled with parameters under the "Background comparison" group in the CLI.
-By default, MethBat requires Z-scores >= 3.0, absolute deltas >= 0.2, and at least 10 datasets in the background cohort in order to assign any Hypo- or Hyper- states.
+By default, MethBat requires Z-scores >= 3.0, absolute methylation deltas >= 20%, and at least 10 datasets in the background cohort in order to assign any Hypo- or Hyper- states.
 
 ## Cohort methylation analysis
 This step will compare two categories in a cohort against each other and label regions with significant differences.
@@ -157,20 +135,21 @@ Parameters:
 
 # Output files
 ## Single dataset profiles
-The CSV/TSV file containing CpG methylation metrics for the provided regions.
+The CSV/TSV file containing region-level methylation metrics for the provided regions.
 If a background profile is provided, relative metrics (such as Z-scores) will also be generated.
+The file begins with comment lines (`##`) for methbat version, run time, and command line (see shared header behavior in [pileup output](./pileup_guide.md#output-files)), then a single column header row and data rows.
 
 Fields:
 * `chrom`, `start`, `end` - the region definition, copied from the input region file
-* `cpg_label` - a pass-through of the optional `cpg_label` field from the background file; empty string if not provided
+* `region_label` - a pass-through of the optional label from the background file; empty string if not provided (legacy header `cpg_label` is accepted when reading inputs)
 * `summary_label` - a summarization of the methylation status for this region, possible options are below:
-  * `NoData` - indicates no CpGs were found inside the region
-  * `Uncategorized` - indicates that CpGs were present, but there was not enough evidence to label this region with any of the following labels
-  * `Methylated` - indicates that the combined CpG methylation had a high average methylation rate (by default, >=80%)
-  * `Unmethylated` - indicates that the combined CpG methylation had a low average methylation rate (by default, <=20%)
-  * `AlleleSpecificMethylation` - indicates that a sufficient fraction of the CpGs were phased (by default, >=50%) _and_ that ASM was detected through _both_ a significant Fisher's exact test (by default, p <= 0.01) and difference in mean methylation for haplotypes 1 and 2 (by default, >= 40% methylation delta)
+  * `NoData` - indicates no pileup sites were found inside the region
+  * `Uncategorized` - indicates that sites were present, but there was not enough evidence to label this region with any of the following labels
+  * `Methylated` - indicates that the combined methylation had a high average methylation rate (by default, >=80%)
+  * `Unmethylated` - indicates that the combined methylation had a low average methylation rate (by default, <=20%)
+  * `AlleleSpecificMethylation` - indicates that a sufficient fraction of sites were phased (by default, >=50%) _and_ that ASM was detected through _both_ a significant Fisher's exact test (by default, p <= 0.01) and difference in mean haplotype methylation (by default, >= 50% methylation delta)
 * `compare_label` - a high level summary label of the comparison of this dataset to the background; the "Background comparison" settings control the cut-offs that alter this output, with internally tested heuristics used as defaults; possible options are below:
-  * `InsufficientData` - if this dataset does not have CpGs or the the number of datasets in the background is not sufficient
+  * `InsufficientData` - if this dataset does not have usable pileup data or the number of datasets in the background is not sufficient
   * `Uncategorized` - if the region does not match any of the summary labels below
   * `HypoASM` - if the region shows significantly _less_ ASM in the dataset than the background; this option has lower priority than the following options
   * `HyperASM` - if the region shows significantly _more_ ASM in the dataset than the background; the `summary_label` must be "AlleleSpecificMethylation"
@@ -180,26 +159,28 @@ Fields:
 * `category_pop_count` - the number of datasets in the background population with the same `summary_label`
 * `category_pop_freq` - the percentage of datasets (excluding `NoData`) in the background population with the same `summary_label`
 * `asm_fishers_pvalue` - the raw p-value from a Fisher's exact test comparing the two haplotypes and the number of reads that are methylated/unmethylated
-* `mean_hap{x}_methyl` - the mean (average) methylation ratio for CpGs on an individual haplotype (hap1 and hap2)
-* `mean_meth_delta` - the difference in mean methylation ratios between the two haplotypes; `mean_meth_delta = mean_hap2_methyl - mean_hap1_methyl`
+* `mean_hap{x}_methyl` - the mean (average) haplotype methylation percentage on haplotype 1 or 2
+* `mean_meth_delta` - the difference in mean haplotype methylation percentages; `mean_meth_delta = mean_hap2_methyl - mean_hap1_methyl`
 * `mean_abs_meth_delta_zscore` - if a background region file was provided, this value is the Z-score comparing `abs(mean_meth_delta)` against the background profile; positive values indicate _more_ evidence of ASM in this dataset relative to the population, negative values indicate _less_
-* `mean_combined_methyl` - the mean (average) combined methylation ratio; "combined" here indicates that phasing (i.e. haplotypes) is not considered
-* `mean_combined_methyl_delta` - if a background region file was provided, this value is the raw delta value comparing the sample methylation to the population mean: `mean_combined_methyl - population_mean_combined_methyl`; positive values indicate this dataset is hyper-methylated relative to the the population, negative values indicate hypo-methylation
+* `mean_combined_methyl` - the mean (average) combined methylation percentage; "combined" here indicates that phasing (i.e. haplotypes) is not considered
+* `mean_combined_methyl_delta` - if a background region file was provided, this value is the raw delta comparing the sample to the population mean combined methylation: `mean_combined_methyl - population_mean_combined_methyl`; positive values indicate this dataset is hyper-methylated relative to the population, negative values indicate hypo-methylation
 * `mean_combined_methyl_zscore` - if a background region file was provided, this value is the corresponding Z-score for `mean_combined_methyl_delta`
-* `num_phased_cpgs` - the number of CpGs in the region with haplotagged reads on both haplotypes
-* `num_partial_cpgs` - the number of CpGs in the region with haplotagged reads on only one haplotype
-* `num_unphased_cpgs` - the number of CpGs in the region with no haplotagged reads
-* `median_total_coverage` - the median coverage across all CpGs in the region
-* `median_hap1_coverage` - the median coverage for CpGs with haplotype 1 information
-* `median_hap2_coverage` - the median coverage for CpGs with haplotype 2 information
+* `num_phased_sites` - the number of pileup sites in the region with haplotagged reads on both haplotypes
+* `num_partial_sites` - the number of pileup sites in the region with haplotagged reads on only one haplotype
+* `num_unphased_sites` - the number of pileup sites in the region with no haplotagged reads
+* `median_total_coverage` - the median coverage across all sites in the region
+* `median_hap1_coverage` - the median coverage for sites with haplotype 1 information
+* `median_hap2_coverage` - the median coverage for sites with haplotype 2 information
 
 Example:
 ```
-chrom	start	end	cpg_label	summary_label	compare_label	background_category	category_pop_count	category_pop_freq	asm_fishers_pvalue	mean_hap1_methyl	mean_hap2_methyl	mean_meth_delta	mean_abs_meth_delta_zscore	mean_combined_methyl	mean_combined_methyl_delta	mean_combined_methyl_zscorenum_phased_cpgs	num_partial_cpgs	num_unphased_cpgs	median_total_coverage	median_hap1_coverage	median_hap2_coverage
-chr1	28735	29737		Unmethylated	Uncategorized	ALL	75	1.0	1.0					0.17243041578246626	0.1464171602940825	31.679626056551015	0	112	0	30	0	0
-chr1	28735	29737		Unmethylated	Uncategorized	FEMALE	45	1.0	1.0					0.17243041578246626	0.1454921997690331635.503286897692604	0	112	0	30	0	0
-chr1	135124	135563		Uncategorized	Uncategorized	ALL	13	0.17333333333333334	2.8101320453402143e-6	0.8458333333333332	0.6798662173202615	-0.1659671160130719	2.251684417249699	0.7112726449275364	-0.12212309455390957	-2.3180253595055658	32	0	0	24	6	18
-chr1	135124	135563		Uncategorized	Uncategorized	FEMALE	8	0.17777777777777778	2.8101320453402143e-6	0.8458333333333332	0.6798662173202615	-0.1659671160130719	1.9303680510272383	0.7112726449275364	-0.12020558409700743	-2.4153845948490433	32	0	0	24	6	18
+chrom	start	end	region_label	summary_label	compare_label	background_category	category_pop_count	category_pop_freq	asm_fishers_pvalue	mean_hap1_methyl	mean_hap2_methyl	mean_meth_delta	mean_abs_meth_delta_zscore	mean_combined_methyl	mean_combined_methyl_delta	mean_combined_methyl_zscore	num_phased_sites	num_partial_sites	num_unphased_sites	median_total_coverage	median_hap1_coverage	median_hap2_coverage
+chr1	28735	29737	CpG:_111	Unmethylated	Uncategorized	ALL	10	1.000	5.472211e-2	2.5	1.3	-1.3	-0.731	4.9	-1.0	-0.279	114	0	0	22	8	7
+chr1	135124	135563	CpG:_30	Uncategorized	Uncategorized	ALL	6	0.600	9.346681e-1	78.5	79.0	0.4	-1.123	78.2	-1.9	-0.323	30	0	0	31	17	13
+chr1	199251	200121	CpG:_104	Unmethylated	Uncategorized	ALL	10	1.000	1.000000e0	6.0	5.9	-0.1	-1.286	5.6	-1.9	-0.498	105	0	0	22	12	7
+chr1	368792	370063	CpG:_99	NoData	InsufficientData	ALL			1.000000e0								0	0	0	0	0	0
+chr1	381172	382185	CpG:_84	Methylated	Uncategorized	ALL	6	0.857	1.000000e0					95.8	3.3	0.444	0	0	83	4	0	0
+chr1	491107	491546	CpG:_29	Methylated	Uncategorized	ALL	5	0.556	1.000000e0					82.8	2.5	0.364	0	0	30	6	0	0
 ...
 ```
 
@@ -210,21 +191,24 @@ Example cohort background profiles can be found in the [data folder](../data/).
 
 Fields:
 * `chrom`, `start`, `end` - the region definition
-* `cpg_label` - a pass-through of the optional `cpg_label` field from the profile files; empty string if not provided
+* `region_label` - a pass-through of the optional label from the profile files; empty string if not provided (legacy header `cpg_label` is accepted when reading)
 * `data_category` - the label assigned to the dataset; "ALL" indicates the full cohort; there is one line in the file for each combination of region and `data_category`
-* `num_phased` - the number of datasets with `num_phased_cpgs > 0` for this region
-* `num_unphased` - the number of datasets with `num_phased_cpgs == 0` for this region
-* `NoData` - the number of datasets that have no CpG data for this region; total number of datasets `= num_phased + num_unphased + NoData`
+* `num_phased` - the number of datasets with `num_phased_sites > 0` for this region
+* `num_unphased` - the number of datasets with `num_phased_sites == 0` for this region
+* `NoData` - the number of datasets that have no pileup data for this region; total number of datasets `= num_phased + num_unphased + NoData`
 * `Uncategorized`, `Methylated`, `Unmethylated`, `AlleleSpecificMethylation` - the number of datasets with the corresponding `summary_label` for the region
 * `avg_abs_meth_deltas`, `stdev_abs_meth_deltas` - the average (mean) and standard deviation of the population's `abs(mean_meth_delta)`; conceptually, this is a measure of average ASM across the cohort, where higher values indicate larger methylation differences between haplotypes 1 and 2; these values are used to calculate `mean_abs_meth_delta_zscore` in a dataset profile
 * `avg_combined_methyls`, `stdev_combined_methyls` - the average (mean) and standard deviation of the population's `mean_combined_methyl`; conceptually, this is a measure of average methylated across the cohort, where higher values indicate that the population tends to be methylated, and lower values indicated unmethylated; these values are used to calculate `mean_combined_methyl_zscore` in a dataset profile
 
 Example:
 ```
-chrom	start	end	cpg_label	data_category	num_phased	num_unphased	NoData	Uncategorized	Methylated	Unmethylated	AlleleSpecificMethylation	avg_abs_meth_deltas	stdev_abs_meth_deltas	avg_combined_methyls	stdev_combined_methyls
-chr1	28735	29737		ALL	35	40	0	0	0	75	0	0.024403707454700878	0.027451278913196875	0.026013255488383766	0.00462180835192671
-chr1	28735	29737		FEMALE	24	21	0	0	0	45	0	0.027315808774336398	0.029415442108339362	0.026938216013433092	0.004097992396824781
-chr1	28735	29737		MALE	11	19	0	0	0	30	0	0.01805003184822339	0.022522685750106002	0.02462581470080977	0.005070390346250782
+chrom	start	end	region_label	data_category	num_phased	num_unphased	NoData	Uncategorized	Methylated	Unmethylated	AlleleSpecificMethylation	avg_abs_meth_deltas	stdev_abs_meth_deltas	avg_combined_methyls	stdev_combined_methyls
+chr1	28735	29737	CpG:_111	ALL	5	5	0	0	0	10	0	2.0	1.0	5.9	3.5
+chr1	28735	29737	CpG:_111	HG002	3	3	0	0	0	6	0	1.8	0.6	7.1	4.2
+chr1	28735	29737	CpG:_111	HG005	2	2	0	0	0	4	0	2.2	1.7	4.1	0.5
+chr1	135124	135563	CpG:_30	ALL	10	0	0	6	4	0	0	4.6	3.7	80.1	5.8
+chr1	135124	135563	CpG:_30	HG002	6	0	0	4	2	0	0	2.9	2.8	80.6	7.6
+chr1	135124	135563	CpG:_30	HG005	4	0	0	2	2	0	0	7.3	3.4	79.2	1.8
 ...
 ```
 
@@ -251,14 +235,14 @@ Fields:
 * `zscore_avg_combined_methyls`, `delta_avg_combined_methyls` - the Z-score and raw delta of the compare v. baseline for average combined methylation; if the Z-score is sufficiently low, it will be flagged as `HypoMethylated`; if the Z-score is sufficiently high, it will be flagged as `HyperMethylated`
 * `baseline_num_samples`, `compare_num_samples` - the number of datasets (both phased and unphased) in baseline and compare for this region; if this is not sufficiently high, the region will be flagged as `InsufficientData`
 
-Example (this file has been spliced to show different results from FEMALE v. MALE outputs):
+Example:
 ```
 chrom	start	end	baseline_category	compare_category	summary_comparison	zscore_avg_abs_meth_deltas	delta_avg_abs_meth_deltas	baseline_num_phased	compare_num_phased	zscore_avg_combined_methyls	delta_avg_combined_methyls	baseline_num_samples	compare_num_samples
-chr1	28735	29737	FEMALE	MALE	Uncategorized	0.0783692468300548	0.0003903381431094449	44	29	-2.1384731927805856	-0.0022979451513482282	45	30
-chr1	491107	491546	FEMALE	MALE	InsufficientData		0.0	0	0	-1.299378424859551	-0.044848726779527226	16	9
-chr1	143326822	143327608	FEMALE	MALE	HyperMethylated	0.6439708246041966	0.09808535591965556	9	7	4.217908672989068	0.2262013390038578	45	30
-chrX	19133	20029	FEMALE	MALE	HyperASM	4.961975548625674	0.39109889418176313	27	18	2.7705796060748784	0.16345014506408945	38	29
-chrX	9785526	9787061	FEMALE	MALE	HypoMethylated	-2.8538050434741886	-0.10707585326802943	45	9	-11.54167875937393	-0.2214659100846959	45	30
-chrX	12791036	12791314	FEMALE	MALE	HypoASM	-6.333953266171334	-0.28676116392809575	45	13	-40.322033758618794	-0.3669797450046681	45	30
+chr1	28735	29737	HG002	HG005	Uncategorized	0.320	0.4	3	2	-1.731	-3.0	6	4
+chr1	135124	135563	HG002	HG005	Uncategorized	2.148	4.4	6	4	-0.433	-1.4	6	4
+chr1	199251	200121	HG002	HG005	Uncategorized	0.565	0.4	5	3	-2.533	-4.5	6	4
+chr1	368792	370063	HG002	HG005	InsufficientData		0.0	0	0	-6.765	-20.7	1	3
+chr1	381172	382185	HG002	HG005	InsufficientData		0.0	0	0	2.659	8.8	5	2
+chr1	491107	491546	HG002	HG005	Uncategorized		8.4	0	2	-0.861	-3.6	5	4
 ...
 ```

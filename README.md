@@ -9,10 +9,12 @@
 MethBat will aggregate and analyze CpG methylation calls made from [PacBio HiFi](https://www.pacb.com/technology/hifi-sequencing/) datasets.
 Key features include:
 
+* Generation of methylation pileup BED files from aligned BAM files
 * Creation of a methylation profile for a collection of genomic regions (e.g., CpG islands)
 * Creation of cohort / background profiles from a collection of methylation profiles
 * Analysis of cohort profiles comparing sub-groups (e.g., case v. control, male v. female)
-* Segmentation of the CpGs in a dataset into Methylated, Unmethylated, or ASM regions
+* Identification of genomic regions with differential methylation between case and control cohorts from pooled pileup data
+* Segmentation of pileup-derived methylation values into Methylated, Unmethylated, or ASM regions
 * Cell type deconvolution from bulk methylation data using reference atlases
 
 Authors: [Matt Holt](https://github.com/holtjma), [Chris Saunders](https://github.com/ctsa)
