@@ -40,7 +40,11 @@ Optional parameters are described in [Pileup options](#pileup-options). For a fu
 | `--min-mapq` | `1` | Minimum mapping quality for a read to be counted |
 | `--min-coverage` | `4` | Minimum reads with modification information required to emit a site |
 | `--edge-trimming-size` | `20` | Bases trimmed from each read end for coverage and methylation |
+| `--phase-set-min-fraction` | `0.7` | Minimum fraction of haplotagged reads assigned to a single phase set for that phase set to be treated as dominant |
 | `--include-empty-sites` | off | For 6mA, also emit sites with no methylated reads |
+| `--skip-5mC` | off | Skips 5mC analysis |
+| `--skip-5hmC` | off | Skips 5hmC analysis |
+| `--skip-6mA` | off | Skips 6mA analysis |
 
 ## Presets
 
@@ -50,7 +54,7 @@ However, the following presets are provided in addition to the defaults:
 * `pbcpgtools` — **Intended only for legacy compatibility**, matching the behavior of [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools) count mode. This alters settings on the CLI to match those of pb-CpG-tools, and also allows reads with empty methylation tags to contribute to the pileup, which is _not_ recommended for recent datasets.
 
 # Output files
-The pileup generates one bgzipped BED per modification family and a tabix index (`.tbi`) for each.
+The pileup generates one bgzipped BED per modification family that was processed and a tabix index (`.tbi`) for each.
 Use these files as inputs to downstream tools such as `methbat profile` via `--input-pileup` (point at the appropriate `{OUT_PREFIX}.{mod}.bed.gz` for your modification of interest).
 
 Output files:
@@ -116,7 +120,7 @@ chr22  100200  100201  h  333  +  33.3  hap2  3  1  2  0  0  0.900  0.100
 ```
 
 ## Summary JSON
-Alongside the BED files, `methbat pileup` always writes a JSON summary at `{OUT_PREFIX}.summary.json` containing run metadata, the CLI settings that were used, and per-methylation-type statistics.
+Alongside the BED files, `methbat pileup` writes a JSON summary at `{OUT_PREFIX}.summary.json` containing run metadata, the CLI settings that were used, and per-methylation-type statistics.
 
 Top-level keys:
 
@@ -124,7 +128,7 @@ Top-level keys:
 * `datetime` — UTC timestamp of the run (same as the `##datetime` header)
 * `command` — full command line invoked (same as the `##command` header)
 * `cli_settings` — serialized pileup CLI options (`input_bams`, `output_prefix`, thresholds, preset, etc.)
-* `statistics` — an object keyed by merged modification type (`"5mC"`, `"5hmC"`, `"6mA"`); stranded summary metrics are not reported
+* `statistics` — an object keyed by merged modification type (`"5mC"`, `"5hmC"`, `"6mA"`) for each type that was processed (skipped types are omitted); stranded summary metrics are not reported
 
 For each methylation type the statistics aggregate **only Total rows** from the corresponding `.bed.gz` (haplotype-specific rows are excluded):
 
