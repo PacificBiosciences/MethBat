@@ -1,3 +1,10 @@
+# v1.1.0
+## Changes
+- `methbat pileup` now tracks coverage and methylation per phase set ID (`PS` tag) at each reference position. When multiple phase sets overlap at a site, only the dominant phase set is reported. If there is no dominant phase set, then only the Total pileup value is reported.
+- Added `--phase-set-min-fraction` to `methbat pileup` (default `0.7`): minimum fraction of haplotagged reads a phase set must represent to be treated as dominant when emitting or rescuing haplotype-specific sites. Valid values: greater than `0.5` and at most `1.0`.
+- Added multiple optimizations to the `pileup` sub-command, substantially reducing compute requirements for the process.
+- Added three new options to skip methylation analysis in the `pileup` sub-command: `--skip-5mC`, `--skip-5hmC`, and `--skip-6mA`
+
 # v1.0.0
 ## Changes
 - MethBat now generates per-base-modification pileup BEDs directly from aligned HiFi BAM files via the new `methbat pileup` sub-command; [pb-CpG-tools](https://github.com/PacificBiosciences/pb-CpG-tools) is no longer required or supported as an input source. See the [pileup guide](./docs/pileup_guide.md) for usage.
