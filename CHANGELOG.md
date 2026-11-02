@@ -1,3 +1,10 @@
+# v1.2.0
+## Changes
+- **Breaking consistency change:** `methbat profile` was inconsistent with the other sub-commands because `compare_label` depended on `summary_label`. It has been altered so the two labels are independently calculated.
+
+## Fixed
+- In `methbat build`, rows with no data will now omit mean and stdev columns instead of reporting defaults. Downstream executions of `methbat profile` will correctly flag these as `InsufficientData` for comparison.
+
 # v1.1.0
 ## Changes
 - `methbat pileup` now tracks coverage and methylation per phase set ID (`PS` tag) at each reference position. When multiple phase sets overlap at a site, only the dominant phase set is reported. If there is no dominant phase set, then only the Total pileup value is reported.

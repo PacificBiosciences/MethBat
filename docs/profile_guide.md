@@ -148,13 +148,13 @@ Fields:
   * `Methylated` - indicates that the combined methylation had a high average methylation rate (by default, >=80%)
   * `Unmethylated` - indicates that the combined methylation had a low average methylation rate (by default, <=20%)
   * `AlleleSpecificMethylation` - indicates that a sufficient fraction of sites were phased (by default, >=50%) _and_ that ASM was detected through _both_ a significant Fisher's exact test (by default, p <= 0.01) and difference in mean haplotype methylation (by default, >= 50% methylation delta)
-* `compare_label` - a high level summary label of the comparison of this dataset to the background; the "Background comparison" settings control the cut-offs that alter this output, with internally tested heuristics used as defaults; possible options are below:
+* `compare_label` - a high level summary label of the comparison of this dataset to the background; the "Background comparison" settings control the cut-offs that alter this output, with internally tested heuristics used as defaults; possible options are listed below in priority order, and the highest-priority label that matches is assigned:
   * `InsufficientData` - if this dataset does not have usable pileup data or the number of datasets in the background is not sufficient
-  * `Uncategorized` - if the region does not match any of the summary labels below
-  * `HypoASM` - if the region shows significantly _less_ ASM in the dataset than the background; this option has lower priority than the following options
-  * `HyperASM` - if the region shows significantly _more_ ASM in the dataset than the background; the `summary_label` must be "AlleleSpecificMethylation"
-  * `HypoMethylated` - if the region shows significantly _less_ methylation in the dataset than the background; the `summary_label` must be "Unmethylated"
-  * `HyperMethylated` - if the region shows significantly _more_ methylation in the dataset than the background; the `summary_label` must be "Methylated"
+  * `HypoMethylated` - if the region shows significantly _less_ methylation in the dataset than the background
+  * `HyperMethylated` - if the region shows significantly _more_ methylation in the dataset than the background
+  * `HyperASM` - if the region shows significantly _more_ ASM in the dataset than the background
+  * `HypoASM` - if the region shows significantly _less_ ASM in the dataset than the background
+  * `Uncategorized` - if the region does not match any of the comparison labels above
 * `background_category` - if a background region file was provided, this field will have the label of the compared sub-group; if multiple labels are specified via CLI, there will be one row for each region and label
 * `category_pop_count` - the number of datasets in the background population with the same `summary_label`
 * `category_pop_freq` - the percentage of datasets (excluding `NoData`) in the background population with the same `summary_label`
